@@ -27,7 +27,7 @@ export default defineConfig({
       ),
 
       NEXT_PUBLIC_SITE_URL: bindings.text(
-        "https://wacrm.billowing-flower-1155.workers.dev"
+        "https://wa.ftta.in"
       ),
 
       NEXT_PUBLIC_APP_LOCALE: bindings.text("en"),
