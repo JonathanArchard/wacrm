@@ -20,6 +20,22 @@ export default defineConfig({
     env: {
       ASSETS: bindings.assets(),
       IMAGES: bindings.images(),
+
+      // Public application configuration
+      NEXT_PUBLIC_SUPABASE_URL: bindings.text(
+        "https://mimjmzjjsfteiwsztypk.supabase.co"
+      ),
+
+      NEXT_PUBLIC_SITE_URL: bindings.text(
+        "https://wacrm.billowing-flower-1155.workers.dev"
+      ),
+
+      NEXT_PUBLIC_APP_LOCALE: bindings.text("en"),
+
+      // Secrets managed securely through Cloudflare
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: bindings.secret(),
+      SUPABASE_SERVICE_ROLE_KEY: bindings.secret(),
+      ENCRYPTION_KEY: bindings.secret(),
     },
   }),
 });
