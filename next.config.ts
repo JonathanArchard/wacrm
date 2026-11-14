@@ -76,7 +76,7 @@ const nextConfig: NextConfig = {
   // Emit a self-contained server bundle (.next/standalone) so the
   // Docker image can run without node_modules or the Next CLI.
   // Harmless outside Docker: `next start` keeps working as before.
-  output: "standalone",
+  //soutput: "standalone",
   experimental: {
     turbopackPluginRuntimeStrategy: "workerThreads",
     cpus: 4,

@@ -45,3 +45,11 @@ next-env.d.ts
 
 # supabase
 supabase/.temp/
+/dist/
+.vinext/
+.cloudflare/
+
+# Cloudflare generated files and local secrets
+.cloudflare/
+.dev.vars*
+.wrangler/
