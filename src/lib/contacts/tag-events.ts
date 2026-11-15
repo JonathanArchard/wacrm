@@ -4,6 +4,7 @@ import {
   runAutomationsForTrigger,
   type AutomationContext,
 } from '@/lib/automations/engine';
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
 import { addContactTagIfAbsent } from './tag-write';
 import { MAX_TAG_CHAIN_DEPTH, getTagChainDepth } from './tag-chain';
 
@@ -20,7 +21,7 @@ interface AddContactTagAndDispatchInput {
 export interface AddContactTagResult {
   added: boolean;
   dispatched: boolean;
-  reason?: 'duplicate' | 'max_depth';
+  reason?: 'duplicate' | 'max_depth' | 'delivery_disabled';
 }
 
 /**
@@ -37,6 +38,8 @@ export async function addContactTagAndDispatch(
   });
 
   if (!added) return { added: false, dispatched: false, reason: 'duplicate' };
+
+  if (externalDeliveryDisabled()) return { added: true, dispatched: false, reason: 'delivery_disabled' };
 
   const depth = getTagChainDepth(input.context);
   if (depth >= MAX_TAG_CHAIN_DEPTH) {
