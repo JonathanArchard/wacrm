@@ -17,7 +17,7 @@
     "linkInvalid": "That link couldn’t be used to sign you in. If you were confirming your email, it may already be verified — just sign in below. For a password reset, request a new link and open it in the same browser you requested it from."
   },
   "Sidebar": {
-    "title": "CRM Template for WhatsApp",
+    "title": "WhatsApp",
     "primaryNav": "Primary",
     "dashboard": "Dashboard",
     "inbox": "Inbox",
@@ -757,7 +757,7 @@
       "noPipelinesYet": "No pipelines yet",
       "managePipelines": "Manage Pipelines",
       "addPipeline": "Add Pipeline",
-      "addDeal": "Add Deal",
+      "addDeal": "Add Student",
       "createToStartTracking": "Create a pipeline to start tracking deals",
       "createPipeline": "Create Pipeline",
       "newPipeline": "New Pipeline",
@@ -782,8 +782,8 @@
       }
     },
     "board": {
-      "dropDealHere": "Drop a deal here",
-      "addDeal": "Add Deal"
+      "dropDealHere": "Drop a student here",
+      "addDeal": "Add Student"
     },
     "card": {
       "noContact": "No contact",
@@ -791,10 +791,10 @@
       "lost": "Lost"
     },
     "form": {
-      "editDeal": "Edit Deal",
-      "newDeal": "New Deal",
+      "editDeal": "Edit Student",
+      "newDeal": "New Student",
       "title": "Title",
-      "titlePlaceholder": "Deal title",
+      "titlePlaceholder": "Student or admission title",
       "contact": "Contact",
       "selectContact": "Select a contact",
       "searchContacts": "Search contacts by name or phone",
@@ -814,7 +814,7 @@
       "cancel": "Cancel",
       "saving": "Saving...",
       "saveChanges": "Save Changes",
-      "createDeal": "Create Deal",
+      "createDeal": "Add Student",
       "deletePrompt": "Delete this deal?",
       "confirm": "Confirm",
       "deleting": "Deleting...",

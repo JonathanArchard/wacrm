@@ -188,8 +188,8 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
             close button is hidden since the sidebar is always-visible. */}
         <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <MessageSquare className="h-4 w-4" />
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#25D366] text-white">
+              <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20.5 11.8a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.3-4.8A8.5 8.5 0 1 1 20.5 11.8Z" /><path d="M9 7.5 7.8 8.7c-.3.4-.1 1.7 1.5 3.6s3.5 3.1 4.8 3.3c.6.1 1.1-.1 1.4-.5l1-1.3-2.4-1.4-.8.8c-1.6-.7-2.7-1.8-3.4-3.3l.7-.8L9 7.5Z" fill="currentColor" stroke="none" /></svg>
             </div>
             <span className="text-sm font-semibold text-foreground">
               {t("title")}
