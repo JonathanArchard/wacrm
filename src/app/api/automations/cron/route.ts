@@ -1,3 +1,5 @@
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
+import { externalDeliveryUnavailable } from '@/lib/external-delivery-response';
 import { timingSafeEqual } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/automations/admin-client'
@@ -34,6 +36,8 @@ export async function GET(request: Request) {
   ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
 
   // Close out wait_for_reply runs whose 24h reply window lapsed. The
   // webhook already refuses to resume them; this just settles their
