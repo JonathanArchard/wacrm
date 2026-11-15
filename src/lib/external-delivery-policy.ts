@@ -1,6 +1,7 @@
-/** Block external messaging and webhook delivery in staging, even if a flag is accidentally enabled. */
+/** External delivery is opt-in. Missing or invalid runtime bindings deny delivery. */
 export function externalDeliveryDisabled(): boolean {
-  return process.env.APP_ENV === 'staging' ||
+  return process.env.APP_ENV !== 'production' ||
     process.env.NEXT_PUBLIC_SITE_URL === 'https://wa-staging.ftta.in' ||
-    process.env.WHATSAPP_ENABLED === 'false';
+    process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('wufgihqppsmbhflbwtcc') === true ||
+    process.env.WHATSAPP_ENABLED !== 'true';
 }
