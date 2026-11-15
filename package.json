@@ -42,6 +42,7 @@
     "build:vinext": "vite build",
     "start:vinext": "vite preview",
     "deploy:vinext": "node scripts/validate-staging-deployment.mjs && vinext-cloudflare deploy",
+    "validate:network": "node scripts/validate-network-policy.mjs",
     "validate:staging": "node scripts/validate-staging-deployment.mjs"
   },
   "dependencies": {
