@@ -1,3 +1,4 @@
+import { externalAiDisabled } from './environment-policy'
 import { supabaseAdmin } from './admin-client'
 import { loadAiConfig } from './config'
 import { buildConversationContext } from './context'
@@ -50,6 +51,7 @@ interface DispatchArgs {
 export async function dispatchInboundToAiReply(
   args: DispatchArgs,
 ): Promise<void> {
+  if (externalAiDisabled()) return
   const {
     accountId,
     conversationId,

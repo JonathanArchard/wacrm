@@ -33,6 +33,7 @@ export default defineConfig({
       NEXT_PUBLIC_APP_LOCALE: bindings.text("en"),
       APP_ENV: bindings.text("staging"),
       WHATSAPP_ENABLED: bindings.text("false"),
+      AI_ENABLED: bindings.text("false"),
 
       // Secrets managed securely through Cloudflare
       NEXT_PUBLIC_SUPABASE_ANON_KEY: bindings.secret(),

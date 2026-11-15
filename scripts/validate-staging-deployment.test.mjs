@@ -5,7 +5,8 @@ import { validateStagingDeployment } from './validate-staging-deployment.mjs';
 
 const config = readFileSync(new URL('../cloudflare.config.ts', import.meta.url), 'utf8');
 test('staging config passes with staging branch', () => assert.deepEqual(validateStagingDeployment('staging', config), []));
-for (const branch of ['main', '', 'feature/example']) {
+for (const branch of ['main', '', 'feature/example'  ['AI_ENABLED: bindings.text("false")', 'AI_ENABLED: bindings.text("true")', 'AI must be disabled'],
+]) {
   test('rejects branch ' + JSON.stringify(branch), () => assert.ok(validateStagingDeployment(branch, config).includes('Deployment requires the staging branch')));
 }
 for (const [before, after, message] of [

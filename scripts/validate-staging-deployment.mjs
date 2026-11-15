@@ -10,6 +10,7 @@ export function validateStagingDeployment(branch, config) {
     [/NEXT_PUBLIC_SUPABASE_URL:\s*bindings\.text\(\s*"https:\/\/wufgihqppsmbhflbwtcc\.supabase\.co"\s*\)/.test(config), 'Expected staging Supabase project'],
     [/APP_ENV:\s*bindings\.text\("staging"\)/.test(config), 'Expected staging environment'],
     [/WHATSAPP_ENABLED:\s*bindings\.text\("false"\)/.test(config), 'WhatsApp must be disabled'],
+    [/AI_ENABLED:\s*bindings\.text\("false"\)/.test(config), 'AI must be disabled'],
     [!config.includes('mimjmzjjsfteiwsztypk') && !config.includes('https://wa.ftta.in'), 'Production targets must be absent'],
   ];
   return checks.filter(([ok]) => !ok).map(([, message]) => message);

@@ -1,3 +1,4 @@
+import { assertExternalAiAllowed } from '../environment-policy'
 import { AiError, type ProviderResult } from '../types'
 import { MAX_OUTPUT_TOKENS } from '../defaults'
 import {
@@ -28,6 +29,7 @@ interface OpenAiResponse {
  * in `generateReply`).
  */
 export async function generateOpenAi(args: ProviderArgs): Promise<ProviderResult> {
+  assertExternalAiAllowed()
   const { apiKey, model, systemPrompt, messages, timeoutMs } = args
 
   let res: Response

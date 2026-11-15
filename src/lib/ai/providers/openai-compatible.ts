@@ -1,3 +1,4 @@
+import { assertExternalAiAllowed } from '../environment-policy'
 import { AiError, type ProviderResult } from '../types'
 import { MAX_OUTPUT_TOKENS } from '../defaults'
 import {
@@ -92,6 +93,7 @@ interface OpenAiCompatibleResponse {
 export async function generateOpenAiCompatible(
   args: ProviderArgs,
 ): Promise<ProviderResult> {
+  assertExternalAiAllowed()
   const { apiKey, model, systemPrompt, messages, timeoutMs, baseUrl } = args
   const endpoint = normalizeOpenAiCompatibleBaseUrl(baseUrl ?? '')
 

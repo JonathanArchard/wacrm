@@ -1,3 +1,4 @@
+import { assertExternalAiAllowed } from './environment-policy'
 import { AiError } from './types'
 import { aiRequestTimeoutMs } from './defaults'
 import { providerHttpError, toNetworkError } from './providers/shared'
@@ -46,6 +47,7 @@ export async function embedTexts(
   inputs: string[],
 ): Promise<number[][]> {
   if (inputs.length === 0) return []
+  assertExternalAiAllowed()
   const timeoutMs = aiRequestTimeoutMs()
   const out: number[][] = []
 

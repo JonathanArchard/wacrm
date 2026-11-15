@@ -16,6 +16,7 @@ export default defineConfig({
       // Existing transport tests use mocked fetch and explicitly opt in.
       APP_ENV: "production",
       WHATSAPP_ENABLED: "true",
+      AI_ENABLED: "true",
       NEXT_PUBLIC_SITE_URL: "https://test.example.invalid",
       NEXT_PUBLIC_SUPABASE_URL: "https://ci.example.invalid",
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "ci-dummy-anon-key",

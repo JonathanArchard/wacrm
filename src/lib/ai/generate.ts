@@ -1,3 +1,4 @@
+import { assertExternalAiAllowed } from './environment-policy'
 import {
   AiError,
   type AiConfig,
@@ -24,6 +25,7 @@ export interface GenerateArgs {
  * of the raw text. Throws `AiError` on any provider/network failure.
  */
 export async function generateReply(args: GenerateArgs): Promise<GenerateResult> {
+  assertExternalAiAllowed()
   const { config, systemPrompt, messages } = args
   const timeoutMs = aiRequestTimeoutMs()
   const providerArgs = {
