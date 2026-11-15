@@ -49,6 +49,15 @@ jobs:
       - name: Network transport audit
         run: npm run validate:network
 
+      - name: Install independent MCP dependencies
+        run: npm ci --prefix mcp-server
+
+      - name: MCP typecheck
+        run: npm --prefix mcp-server run typecheck
+
+      - name: MCP mocked network regression tests
+        run: npm --prefix mcp-server test
+
       - name: Lint
         run: npm run lint
 
