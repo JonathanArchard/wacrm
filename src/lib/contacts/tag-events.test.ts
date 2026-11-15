@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   add: vi.fn(),
@@ -32,7 +32,16 @@ beforeEach(() => {
   mocks.dispatch.mockResolvedValue(undefined);
 });
 
+afterEach(() => vi.unstubAllEnvs());
+
 describe('addContactTagAndDispatch', () => {
+  it('preserves the tag but skips automation in staging', async () => {
+    vi.stubEnv('APP_ENV', 'staging');
+    mocks.add.mockResolvedValue(true);
+    await expect(addContactTagAndDispatch(base)).resolves.toEqual({ added: true, dispatched: false, reason: 'delivery_disabled' });
+    expect(mocks.add).toHaveBeenCalledTimes(1);
+    expect(mocks.dispatch).not.toHaveBeenCalled();
+  });
   it('dispatches once for a newly inserted tag and propagates depth', async () => {
     mocks.add.mockResolvedValue(true);
 
