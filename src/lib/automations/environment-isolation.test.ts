@@ -12,7 +12,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 it('blocks contact-triggered automation before creating a database client', async () => {
-  await runAutomationsForTrigger({ accountId: 'test', contactId: 'test', triggerType: 'new_contact' });
+  await runAutomationsForTrigger({ accountId: 'test', contactId: 'test', triggerType: 'new_contact_created' });
   await runAutomationsForTrigger({ accountId: 'test', contactId: 'test', triggerType: 'tag_added' });
   expect(admin).not.toHaveBeenCalled();
 });
