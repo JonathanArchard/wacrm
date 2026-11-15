@@ -7,6 +7,7 @@ beforeEach(() => {
   vi.stubEnv('APP_ENV', '');
   vi.stubEnv('WHATSAPP_ENABLED', '');
   vi.stubEnv('NEXT_PUBLIC_SITE_URL', '');
+  vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', '');
   vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ messages: [{ id: 'mock' }] }))));
 });
 afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
@@ -33,7 +34,20 @@ describe('external delivery isolation', () => {
     for (const send of sends) await expect(send()).rejects.toThrow('disabled in this environment');
     expect(fetch).not.toHaveBeenCalled();
   });
-  it('preserves upstream behavior with a mocked transport', async () => {
+  it('denies missing runtime bindings', async () => {
+    expect(externalDeliveryDisabled()).toBe(true);
+    await expect(sendTextMessage({ ...base, text: 'test' })).rejects.toThrow('disabled in this environment');
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it('denies staging database even with production flags', () => {
+    vi.stubEnv('APP_ENV', 'production');
+    vi.stubEnv('WHATSAPP_ENABLED', 'true');
+    vi.stubEnv('NEXT_PUBLIC_SUPABASE_URL', 'https://wufgihqppsmbhflbwtcc.supabase.co');
+    expect(externalDeliveryDisabled()).toBe(true);
+  });
+  it('allows explicitly enabled production with a mocked transport', async () => {
+    vi.stubEnv('APP_ENV', 'production');
+    vi.stubEnv('WHATSAPP_ENABLED', 'true');
     expect(externalDeliveryDisabled()).toBe(false);
     await expect(sendTextMessage({ ...base, text: 'test' })).resolves.toEqual({ messageId: 'mock' });
     expect(fetch).toHaveBeenCalledTimes(1);
