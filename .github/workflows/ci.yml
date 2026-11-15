@@ -43,6 +43,12 @@ jobs:
       - name: Staging deployment guard tests
         run: node --test scripts/validate-staging-deployment.test.mjs
 
+      - name: Network regression fixtures
+        run: node --test scripts/validate-network-policy.test.mjs
+
+      - name: Network transport audit
+        run: npm run validate:network
+
       - name: Lint
         run: npm run lint
 
