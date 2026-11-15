@@ -17,6 +17,14 @@ const mcp = /^@modelcontextprotocol\/sdk\//;
 const browserFiles = new Set([
   'src/lib/account/members.ts', 'src/lib/contacts/tag-api.ts',
 ]);
+function isRelativeApi(arg) {
+  if (!arg) return false;
+  if (ts.isParenthesizedExpression(arg)) return isRelativeApi(arg.expression);
+  if (ts.isConditionalExpression(arg)) return isRelativeApi(arg.whenTrue) && isRelativeApi(arg.whenFalse);
+  if (ts.isStringLiteral(arg) || ts.isNoSubstitutionTemplateLiteral(arg)) return arg.text.startsWith('/api/');
+  if (ts.isTemplateExpression(arg)) return arg.head.text.startsWith('/api/');
+  return false;
+}
 export function inspectSource(file, sourceText) {
   const source = ts.createSourceFile(file, sourceText, ts.ScriptTarget.Latest, true);
   const errors = [];
@@ -40,8 +48,7 @@ export function inspectSource(file, sourceText) {
       const name = ts.isIdentifier(expr) ? expr.text : ts.isPropertyAccessExpression(expr) ? expr.name.text : ts.isElementAccessExpression(expr) && ts.isStringLiteral(expr.argumentExpression) ? expr.argumentExpression.text : '';
       if (transports.test(name)) {
         const arg = node.arguments?.[0];
-        const relative = arg && (ts.isStringLiteral(arg) || ts.isNoSubstitutionTemplateLiteral(arg) || ts.isTemplateExpression(arg)) &&
-          (ts.isTemplateExpression(arg) ? arg.head.text : arg.text).startsWith('/api/');
+        const relative = isRelativeApi(arg);
         // Narrow existing dynamic same-origin fetch exception; inspect its source separately.
         const dynamic = file === 'src/components/settings/template-manager.tsx' && arg && ts.isIdentifier(arg) && arg.text === 'url';
         if (!(name === 'fetch' && browser && (relative || dynamic))) report(node, name);
