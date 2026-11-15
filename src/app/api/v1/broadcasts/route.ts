@@ -22,6 +22,8 @@
 //               "total_recipients", "accepted", "rejected" } }
 // ============================================================
 
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
+import { externalDeliveryUnavailable } from '@/lib/external-delivery-response';
 import { after } from 'next/server';
 
 import { requireApiKey } from '@/lib/auth/api-context';
@@ -46,6 +48,7 @@ import {
 export async function POST(request: Request) {
   try {
     const ctx = await requireApiKey(request, 'broadcasts:send');
+    if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
 
     const body = (await request.json().catch(() => null)) as Record<
       string,
