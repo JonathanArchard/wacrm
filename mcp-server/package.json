@@ -36,6 +36,7 @@
     "start": "node dist/index.js",
     "dev": "tsc --watch",
     "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test tests/network-policy.test.mjs",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
