@@ -24,6 +24,7 @@ import { MAX_TAG_CHAIN_DEPTH, getTagChainDepth } from '@/lib/contacts/tag-chain'
 import { engineSendText, engineSendTemplate, engineSendInteractive } from './meta-send'
 import { validateInteractivePayload } from '@/lib/whatsapp/interactive'
 import { isDeliverableUrl } from '@/lib/webhooks/ssrf'
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy'
 import { getT } from '@/lib/i18n/translate'
 import { isWithinTimeWindow } from './time-of-day'
 
@@ -962,6 +963,7 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
     }
 
     case 'send_webhook': {
+      if (externalDeliveryDisabled()) throw new Error('External webhook delivery is disabled in this environment.')
       const cfg = step.step_config as SendWebhookStepConfig
       if (!cfg.url) throw new Error(tErr('needsUrl'))
       // SSRF guard: the URL and headers are account-controlled and the
