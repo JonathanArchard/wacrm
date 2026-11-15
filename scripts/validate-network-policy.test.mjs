@@ -12,3 +12,11 @@ test('allows reviewed policy transports and relative browser API calls', () => {
   assert.deepEqual(inspectSource('src/components/example.tsx', "fetch('/api/contacts')"), []);
   assert.equal(inspectSource('src/components/example.tsx', "fetch('https://example.invalid')").length, 1);
 });
+
+test('conditional browser destinations must both be same-origin API paths', () => {
+  const file = 'src/components/example.tsx';
+  assert.deepEqual(inspectSource(file, "fetch(edit ? `/api/items/${id}` : '/api/items')"), []);
+  assert.equal(inspectSource(file, "fetch(edit ? '/api/items' : 'https://example.invalid')").length, 1);
+  assert.equal(inspectSource(file, "fetch(edit ? '/api/items' : destination)").length, 1);
+  assert.equal(inspectSource('src/lib/server.ts', "fetch(edit ? '/api/items' : '/api/other')").length, 1);
+});
