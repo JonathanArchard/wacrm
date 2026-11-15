@@ -71,6 +71,7 @@ export interface DispatchInput {
  * recorded into automation_logs with status='failed'.
  */
 export async function runAutomationsForTrigger(input: DispatchInput): Promise<void> {
+  if (externalDeliveryDisabled()) return
   try {
     const db = supabaseAdmin()
 
@@ -171,6 +172,7 @@ export async function resumePendingExecution(pending: {
   parked_step_id?: string | null
   context: AutomationContext
 }): Promise<void> {
+  if (externalDeliveryDisabled()) return
   const db = supabaseAdmin()
   const { data: automation, error } = await db
     .from('automations')
@@ -235,6 +237,7 @@ export interface AwaitingReplyInput {
  * Must never throw — it runs inside the webhook's `after()` block.
  */
 export async function resumeAwaitingReply(input: AwaitingReplyInput): Promise<boolean> {
+  if (externalDeliveryDisabled()) return false
   let claimedId: string | null = null
   try {
     const db = supabaseAdmin()
@@ -390,6 +393,7 @@ async function resolveResumePoint(
 export const STALLED_CLAIM_MS = 15 * 60 * 1000
 
 export async function claimPendingExecution(id: string, now: Date = new Date()): Promise<boolean> {
+  if (externalDeliveryDisabled()) return false
   const { data } = await supabaseAdmin()
     .from('automation_pending_executions')
     .update({ status: 'running', claimed_at: now.toISOString() })
