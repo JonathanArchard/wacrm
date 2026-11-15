@@ -1,3 +1,5 @@
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
+import { externalDeliveryUnavailable } from '@/lib/external-delivery-response';
 import { NextResponse } from 'next/server';
 import { requireRole, toErrorResponse } from '@/lib/auth/account';
 import { sendReactionMessage } from '@/lib/whatsapp/meta-api';
@@ -32,6 +34,7 @@ export async function POST(request: Request) {
     // missing role check let a read-only viewer put a visible reaction on
     // the customer's message even though RLS blocked the local mirror.
     const { supabase, accountId, userId } = await requireRole('agent');
+    if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
 
     const limit = checkRateLimit(`react:${userId}`, RATE_LIMITS.react);
     if (!limit.success) {

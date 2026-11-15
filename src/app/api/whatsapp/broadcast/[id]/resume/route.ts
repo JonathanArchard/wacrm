@@ -1,3 +1,5 @@
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
+import { backgroundJobsUnavailable } from '@/lib/background-jobs-response';
 // ============================================================
 // POST /api/whatsapp/broadcast/[id]/resume   (issue #472)
 //
@@ -14,6 +16,8 @@
 // public API's create endpoint.
 // ============================================================
 
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
+import { externalDeliveryUnavailable } from '@/lib/external-delivery-response';
 import { NextResponse } from 'next/server';
 import { after } from 'next/server';
 
@@ -55,6 +59,8 @@ export async function POST(
     // write, and viewers are read-only. Resuming is no different — it
     // puts real messages on real phones.
     const { supabase, accountId, userId } = await requireRole('agent');
+    if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
+    if (backgroundJobsDisabled()) return backgroundJobsUnavailable();
 
     const limit = checkRateLimit(
       `broadcast-resume:${userId}`,

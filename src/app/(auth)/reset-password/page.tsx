@@ -31,11 +31,10 @@ import {
 } from "@/components/ui/card";
 import { CheckCircle, KeyRound, Loader2, MailX } from "lucide-react";
 
-type Status = "checking" | "ready" | "expired" | "done";
+type Status = "checking" | "ready" | "expired" | "done" | "unavailable";
 
 export default function ResetPasswordPage() {
   const t = useTranslations("ResetPasswordPage");
-  const supabase = createClient();
 
   const [status, setStatus] = useState<Status>("checking");
   const [password, setPassword] = useState("");
@@ -47,13 +46,19 @@ export default function ResetPasswordPage() {
     let cancelled = false;
     // The callback wrote the session cookies server-side; the browser
     // client reads them here. No user → the link didn't yield a session.
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!cancelled) setStatus(user ? "ready" : "expired");
-    });
+    void (async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!cancelled) setStatus(user ? "ready" : "expired");
+      } catch {
+        if (!cancelled) setStatus("unavailable");
+      }
+    })();
     return () => {
       cancelled = true;
     };
-  }, [supabase]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,14 +75,19 @@ export default function ResetPasswordPage() {
     }
 
     setSaving(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setSaving(false);
-
-    if (error) {
-      setError(error.message);
-      return;
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) {
+        setError(error.message);
+        return;
+      }
+      setStatus("done");
+    } catch {
+      setError("Authentication is currently unavailable. Please try again later.");
+    } finally {
+      setSaving(false);
     }
-    setStatus("done");
   };
 
   if (status === "checking") {
@@ -91,7 +101,7 @@ export default function ResetPasswordPage() {
     );
   }
 
-  if (status === "expired") {
+  if (status === "expired" || status === "unavailable") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <Card className="w-full max-w-md border-border bg-card">
@@ -100,10 +110,10 @@ export default function ResetPasswordPage() {
               <MailX className="h-6 w-6 text-amber-400" />
             </div>
             <CardTitle className="text-xl text-foreground">
-              {t("expiredTitle")}
+              {status === "unavailable" ? "Authentication unavailable" : t("expiredTitle")}
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              {t("expiredDesc")}
+              {status === "unavailable" ? "Please try again later." : t("expiredDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">

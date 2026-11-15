@@ -1,3 +1,7 @@
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
+import { backgroundJobsUnavailable } from '@/lib/background-jobs-response';
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
+import { externalDeliveryUnavailable } from '@/lib/external-delivery-response';
 import { NextResponse } from 'next/server'
 import { requireRole, toErrorResponse } from '@/lib/auth/account'
 import { runAutomationsForTrigger } from '@/lib/automations/engine'
@@ -21,6 +25,9 @@ export async function POST(request: Request) {
   } catch (err) {
     return toErrorResponse(err)
   }
+
+  if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
+    if (backgroundJobsDisabled()) return backgroundJobsUnavailable();
 
   const limit = checkRateLimit(`automation-trigger:${userId}`, RATE_LIMITS.automationTrigger)
   if (!limit.success) return rateLimitResponse(limit)

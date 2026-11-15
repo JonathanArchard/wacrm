@@ -1,3 +1,5 @@
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
+import { externalDeliveryUnavailable } from '@/lib/external-delivery-response';
 import { NextResponse } from 'next/server'
 import {
   ForbiddenError,
@@ -75,6 +77,7 @@ export async function PATCH(
     // Editing a template pushes a component replacement to Meta before
     // anything is written locally, so the role has to be checked here.
     const { supabase, accountId, userId } = await requireRole('admin')
+    if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
 
     const limit = checkRateLimit(`whatsapp-admin:${userId}`, RATE_LIMITS.whatsappAdmin)
     if (!limit.success) return rateLimitResponse(limit)
@@ -259,6 +262,7 @@ export async function DELETE(
     // Deleting removes the template on Meta first; same reasoning as
     // the PATCH handler above.
     const { supabase, accountId, userId } = await requireRole('admin')
+    if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
 
     const limit = checkRateLimit(`whatsapp-admin:${userId}`, RATE_LIMITS.whatsappAdmin)
     if (!limit.success) return rateLimitResponse(limit)

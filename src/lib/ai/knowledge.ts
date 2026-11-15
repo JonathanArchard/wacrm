@@ -1,3 +1,4 @@
+import { externalAiDisabled } from './environment-policy'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { AiConfig } from './types'
 import { chunkText } from './chunk'
@@ -40,7 +41,7 @@ export async function ingestDocument(
   // document searchable lexically.
   let embeddings: number[][] | null = null
   let embedError: unknown = null
-  if (config.embeddingsApiKey && chunks.length > 0) {
+  if (!externalAiDisabled() && config.embeddingsApiKey && chunks.length > 0) {
     try {
       embeddings = await embedTexts(config.embeddingsApiKey, chunks)
     } catch (err) {
@@ -114,7 +115,7 @@ export async function retrieveKnowledge(
   const picked = new Map<string, string>() // id → content, preserves order
 
   // Semantic path.
-  if (config.embeddingsApiKey) {
+  if (!externalAiDisabled() && config.embeddingsApiKey) {
     try {
       const [queryEmbedding] = await embedTexts(config.embeddingsApiKey, [query])
       if (queryEmbedding) {

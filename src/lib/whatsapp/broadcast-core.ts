@@ -1,3 +1,4 @@
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
 // ============================================================
 // Public-API broadcast core.
 //
@@ -267,6 +268,7 @@ export async function deliverBroadcast(
   db: SupabaseClient,
   plan: BroadcastPlan
 ): Promise<void> {
+  if (backgroundJobsDisabled()) return;
   for (const recipient of plan.planned) {
     const variants = phoneVariants(recipient.phone);
     let sentMessageId: string | null = null;

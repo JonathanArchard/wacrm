@@ -1,3 +1,5 @@
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
+import { backgroundJobsUnavailable } from '@/lib/background-jobs-response';
 // ============================================================
 // POST /api/v1/broadcasts — launch a template broadcast
 // (scope: broadcasts:send).
@@ -22,6 +24,8 @@
 //               "total_recipients", "accepted", "rejected" } }
 // ============================================================
 
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
+import { externalDeliveryUnavailable } from '@/lib/external-delivery-response';
 import { after } from 'next/server';
 
 import { requireApiKey } from '@/lib/auth/api-context';
@@ -46,6 +50,8 @@ import {
 export async function POST(request: Request) {
   try {
     const ctx = await requireApiKey(request, 'broadcasts:send');
+    if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
+    if (backgroundJobsDisabled()) return backgroundJobsUnavailable();
 
     const body = (await request.json().catch(() => null)) as Record<
       string,

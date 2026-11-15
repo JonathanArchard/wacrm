@@ -1,3 +1,6 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
+import { outboundWebhooksDisabled } from '@/lib/webhooks/environment-policy';
 import type {
   Automation,
   AutomationLogStepResult,
@@ -24,6 +27,7 @@ import { MAX_TAG_CHAIN_DEPTH, getTagChainDepth } from '@/lib/contacts/tag-chain'
 import { engineSendText, engineSendTemplate, engineSendInteractive } from './meta-send'
 import { validateInteractivePayload } from '@/lib/whatsapp/interactive'
 import { isDeliverableUrl } from '@/lib/webhooks/ssrf'
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy'
 import { getT } from '@/lib/i18n/translate'
 import { isWithinTimeWindow } from './time-of-day'
 
@@ -70,6 +74,7 @@ export interface DispatchInput {
  * recorded into automation_logs with status='failed'.
  */
 export async function runAutomationsForTrigger(input: DispatchInput): Promise<void> {
+  if (externalDeliveryDisabled() || backgroundJobsDisabled()) return
   try {
     const db = supabaseAdmin()
 
@@ -170,6 +175,7 @@ export async function resumePendingExecution(pending: {
   parked_step_id?: string | null
   context: AutomationContext
 }): Promise<void> {
+  if (externalDeliveryDisabled() || backgroundJobsDisabled()) return
   const db = supabaseAdmin()
   const { data: automation, error } = await db
     .from('automations')
@@ -234,6 +240,7 @@ export interface AwaitingReplyInput {
  * Must never throw — it runs inside the webhook's `after()` block.
  */
 export async function resumeAwaitingReply(input: AwaitingReplyInput): Promise<boolean> {
+  if (externalDeliveryDisabled() || backgroundJobsDisabled()) return false
   let claimedId: string | null = null
   try {
     const db = supabaseAdmin()
@@ -326,6 +333,7 @@ export async function resumeAwaitingReply(input: AwaitingReplyInput): Promise<bo
  * Returns how many runs expired.
  */
 export async function expireAwaitingReplies(now: Date = new Date()): Promise<number> {
+  if (backgroundJobsDisabled()) return 0
   const db = supabaseAdmin()
   const { data, error } = await db
     .from('automation_pending_executions')
@@ -389,6 +397,7 @@ async function resolveResumePoint(
 export const STALLED_CLAIM_MS = 15 * 60 * 1000
 
 export async function claimPendingExecution(id: string, now: Date = new Date()): Promise<boolean> {
+  if (externalDeliveryDisabled() || backgroundJobsDisabled()) return false
   const { data } = await supabaseAdmin()
     .from('automation_pending_executions')
     .update({ status: 'running', claimed_at: now.toISOString() })
@@ -400,6 +409,7 @@ export async function claimPendingExecution(id: string, now: Date = new Date()):
 }
 
 export async function requeueStalledExecutions(now: Date = new Date()): Promise<number> {
+  if (backgroundJobsDisabled()) return 0
   const { data, error } = await supabaseAdmin()
     .from('automation_pending_executions')
     .update({ status: 'pending', claimed_at: null })
@@ -962,6 +972,7 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
     }
 
     case 'send_webhook': {
+      if (externalDeliveryDisabled() || backgroundJobsDisabled() || outboundWebhooksDisabled()) throw new Error('External webhook delivery is disabled in this environment.')
       const cfg = step.step_config as SendWebhookStepConfig
       if (!cfg.url) throw new Error(tErr('needsUrl'))
       // SSRF guard: the URL and headers are account-controlled and the
@@ -972,7 +983,7 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
         throw new Error(tErr('destinationNotAllowed'))
       }
       const body = cfg.body_template ? interpolate(cfg.body_template, args) : JSON.stringify(args.context)
-      const res = await fetch(cfg.url, {
+      const res = await guardedNetworkFetch(cfg.url, {
         method: 'POST',
         headers: { 'content-type': 'application/json', ...(cfg.headers ?? {}) },
         body,

@@ -1,3 +1,4 @@
+import { externalAiDisabled } from '@/lib/ai/environment-policy'
 import { NextResponse } from 'next/server'
 import {
   getCurrentAccount,
@@ -75,6 +76,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const { supabase, accountId, userId } = await requireRole('admin')
+    if (externalAiDisabled()) return NextResponse.json({ error: 'External AI is disabled in this environment', code: 'ai_environment_disabled' }, { status: 403 })
 
     const limit = checkRateLimit(`ai-config:${userId}`, RATE_LIMITS.adminAction)
     if (!limit.success) return rateLimitResponse(limit)

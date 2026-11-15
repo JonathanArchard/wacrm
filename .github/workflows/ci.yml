@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, staging]
   push:
-    branches: [main]
+    branches: [main, staging, feature/staging-deployment-isolation]
 
 # Cancel older CI runs for the same branch when a new commit arrives —
 # saves minutes when someone pushes a stack of fixes to one PR.
@@ -40,6 +40,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Staging deployment guard tests
+        run: node --test scripts/validate-staging-deployment.test.mjs
+
+      - name: Network regression fixtures
+        run: node --test scripts/validate-network-policy.test.mjs
+
+      - name: Network transport audit
+        run: npm run validate:network
+
+      - name: Install independent MCP dependencies
+        run: npm ci --prefix mcp-server
+
+      - name: MCP typecheck
+        run: npm --prefix mcp-server run typecheck
+
+      - name: MCP mocked network regression tests
+        run: npm --prefix mcp-server test
+
       - name: Lint
         run: npm run lint
 
@@ -51,3 +69,6 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Vinext build (no deployment)
+        run: npm run build:vinext

@@ -10,6 +10,8 @@
 // this is a second, client-side guard, not a replacement.
 // ============================================================
 
+import { assertMcpOrigin } from './network-policy.js';
+
 export interface Config {
   baseUrl: string;
   apiKey: string;
@@ -24,6 +26,9 @@ function truthy(value: string | undefined): boolean {
 }
 
 export function loadConfig(): Config {
+  if (process.env.MCP_ENABLED !== 'true' || process.env.APP_ENV !== 'production' || process.env.MCP_EXTERNAL_NETWORK_ENABLED !== 'true') {
+    throw new Error('MCP runtime disabled in this environment');
+  }
   const baseUrlRaw = process.env.WACRM_BASE_URL?.trim();
   const apiKey = process.env.WACRM_API_KEY?.trim();
 
@@ -40,11 +45,8 @@ export function loadConfig(): Config {
 
   // Normalise: strip a trailing slash so path joins are predictable.
   const baseUrl = baseUrlRaw!.replace(/\/+$/, '');
-  if (!/^https?:\/\//.test(baseUrl)) {
-    throw new Error(
-      `WACRM_BASE_URL must start with http:// or https:// (got "${baseUrl}").`,
-    );
-  }
+  const destination = assertMcpOrigin(baseUrl);
+  if (destination.pathname !== '/' || destination.search || destination.hash) throw new Error('MCP base URL must be an origin');
 
   const enableWrites = truthy(process.env.WACRM_ENABLE_WRITES);
   const enableBroadcasts = truthy(process.env.WACRM_ENABLE_BROADCASTS);

@@ -1,3 +1,4 @@
+import { externalAiDisabled } from '@/lib/ai/environment-policy'
 import { NextResponse } from 'next/server'
 import { requireRole, toErrorResponse } from '@/lib/auth/account'
 import { checkRateLimit, rateLimitResponse, RATE_LIMITS } from '@/lib/rate-limit'
@@ -19,6 +20,7 @@ const t = getT('Api')
 export async function POST() {
   try {
     const { supabase, accountId, userId } = await requireRole('admin')
+    if (externalAiDisabled()) return NextResponse.json({ error: 'External AI is disabled in this environment', code: 'ai_environment_disabled' }, { status: 403 })
     const limit = checkRateLimit(`ai-kb-reindex:${userId}`, RATE_LIMITS.adminAction)
     if (!limit.success) return rateLimitResponse(limit)
 

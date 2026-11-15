@@ -1,3 +1,6 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
+import { externalDeliveryUnavailable } from '@/lib/external-delivery-response';
 import { NextResponse } from 'next/server'
 import {
   ForbiddenError,
@@ -138,6 +141,7 @@ export async function POST() {
     // insert/update RLS policies (migration 017) both require 'admin'.
     // Resolving account_id off the profile only proved membership.
     const { supabase, accountId, userId } = await requireRole('admin')
+    if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
 
     const limit = checkRateLimit(`whatsapp-admin:${userId}`, RATE_LIMITS.whatsappAdmin)
     if (!limit.success) return rateLimitResponse(limit)
@@ -179,7 +183,12 @@ export async function POST() {
 
     while (nextUrl && pageCount < PAGE_CAP) {
       pageCount++
-      const metaRes: Response = await fetch(nextUrl, {
+      const destination = new URL(nextUrl)
+      if (destination.origin !== 'https://graph.facebook.com' || destination.username || destination.password) {
+        throw new Error('Invalid Meta pagination destination')
+      }
+      const metaRes: Response = await guardedNetworkFetch(destination, {
+        redirect: 'error',
         headers: { Authorization: `Bearer ${accessToken}` },
       })
 

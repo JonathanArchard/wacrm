@@ -1,3 +1,5 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
+import { assertExternalAiAllowed } from './environment-policy'
 import { AiError } from './types'
 import { aiRequestTimeoutMs } from './defaults'
 import { providerHttpError, toNetworkError } from './providers/shared'
@@ -46,6 +48,7 @@ export async function embedTexts(
   inputs: string[],
 ): Promise<number[][]> {
   if (inputs.length === 0) return []
+  assertExternalAiAllowed()
   const timeoutMs = aiRequestTimeoutMs()
   const out: number[][] = []
 
@@ -54,7 +57,7 @@ export async function embedTexts(
 
     let res: Response
     try {
-      res = await fetch(OPENAI_EMBEDDINGS_URL, {
+      res = await guardedNetworkFetch(OPENAI_EMBEDDINGS_URL, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${apiKey}`,

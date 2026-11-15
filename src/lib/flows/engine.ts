@@ -1,3 +1,4 @@
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
 /**
  * Flow runner.
  *
@@ -988,6 +989,7 @@ async function closeActiveRun(
 export async function dispatchInboundToFlows(
   input: DispatchInboundInput & { isFirstInboundMessage: boolean },
 ): Promise<DispatchInboundResult> {
+  if (backgroundJobsDisabled()) return { consumed: false, outcome: 'no_match' };
   const db = supabaseAdmin();
   let ownedRunId: string | null = null;
   try {

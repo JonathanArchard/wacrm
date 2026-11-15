@@ -1,3 +1,5 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
+import { assertExternalAiAllowed } from '../environment-policy'
 import { AiError, type ProviderResult } from '../types'
 import { MAX_OUTPUT_TOKENS } from '../defaults'
 import {
@@ -92,6 +94,7 @@ interface OpenAiCompatibleResponse {
 export async function generateOpenAiCompatible(
   args: ProviderArgs,
 ): Promise<ProviderResult> {
+  assertExternalAiAllowed()
   const { apiKey, model, systemPrompt, messages, timeoutMs, baseUrl } = args
   const endpoint = normalizeOpenAiCompatibleBaseUrl(baseUrl ?? '')
 
@@ -113,7 +116,7 @@ export async function generateOpenAiCompatible(
 
   let res: Response
   try {
-    res = await fetch(endpoint, {
+    res = await guardedNetworkFetch(endpoint, {
       method: 'POST',
       redirect: 'manual',
       headers: {

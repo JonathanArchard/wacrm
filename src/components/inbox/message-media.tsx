@@ -1,5 +1,6 @@
 "use client";
 
+import { browserNetworkRestricted, safeBrowserMediaUrl } from "@/lib/browser-network-policy";
 import { useCallback, useState } from "react";
 import {
   Download,
@@ -197,7 +198,7 @@ export function MediaVideoBubble({
       {/* Plain URL, not a blob: the element should stream rather than wait
           for up to 16 MB to land. */}
       <video
-        src={message.media_url}
+        src={safeBrowserMediaUrl(message.media_url)}
         controls
         preload="metadata"
         className={cn(MEDIA_BOX, "rounded-lg")}
@@ -235,7 +236,7 @@ export function MediaAudioBubble({
 
   return (
     <div className="flex items-center gap-2">
-      <audio src={message.media_url} controls className="max-w-60" />
+      <audio src={safeBrowserMediaUrl(message.media_url)} controls className="max-w-60" />
       <MediaActionButton
         icon={Download}
         label={t("download")}
@@ -258,11 +259,11 @@ export function MediaDocumentBubble({
   return (
     <div className="flex items-center gap-2">
       <a
-        href={message.media_url}
+        href={browserNetworkRestricted() ? undefined : safeBrowserMediaUrl(message.media_url)}
         target="_blank"
         rel="noopener noreferrer"
         onClick={(event) => {
-          if (!shouldDownloadDocumentClick(message.media_url, event)) return;
+          if (!browserNetworkRestricted() && !shouldDownloadDocumentClick(message.media_url, event)) return;
           event.preventDefault();
           void download();
         }}

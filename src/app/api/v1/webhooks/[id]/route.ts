@@ -7,6 +7,7 @@
 // secret is never returned here — it's shown once at creation only.
 // ============================================================
 
+import { outboundWebhooksDisabled } from '@/lib/webhooks/environment-policy';
 import { requireApiKey } from '@/lib/auth/api-context';
 import { ok, fail, toApiErrorResponse } from '@/lib/api/v1/respond';
 import { isUuid } from '@/lib/api/v1/pagination';
@@ -87,6 +88,9 @@ export async function PATCH(
     if ('is_active' in body) {
       if (typeof body.is_active !== 'boolean') {
         return fail('bad_request', "'is_active' must be a boolean", 400);
+      }
+      if (body.is_active && outboundWebhooksDisabled()) {
+        return fail('webhooks_environment_disabled', 'Outbound webhook activation is disabled in this environment', 403);
       }
       updates.is_active = body.is_active;
       // Re-enabling a disabled endpoint clears its failure streak so it

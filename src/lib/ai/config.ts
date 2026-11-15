@@ -1,3 +1,4 @@
+import { externalAiDisabled } from './environment-policy'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { decrypt } from '@/lib/whatsapp/encryption'
 import type { AiConfig } from './types'
@@ -99,6 +100,7 @@ export async function loadEmbeddingsKey(
   db: SupabaseClient,
   accountId: string,
 ): Promise<{ key: string | null; corrupt: boolean }> {
+  if (externalAiDisabled()) return { key: null, corrupt: false }
   const { data, error } = await db
     .from('ai_configs')
     .select('embeddings_api_key')

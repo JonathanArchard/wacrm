@@ -7,6 +7,7 @@
 // an encrypted copy and can never show it again.
 // ============================================================
 
+import { outboundWebhooksDisabled } from '@/lib/webhooks/environment-policy';
 import { requireApiKey } from '@/lib/auth/api-context';
 import { ok, okList, fail, toApiErrorResponse } from '@/lib/api/v1/respond';
 import { encrypt } from '@/lib/whatsapp/encryption';
@@ -83,6 +84,7 @@ export async function POST(request: Request) {
         url,
         secret: encrypt(secret),
         events,
+        ...(outboundWebhooksDisabled() ? { is_active: false } : {}),
       })
       .select(WEBHOOK_PUBLIC_COLUMNS)
       .single();
