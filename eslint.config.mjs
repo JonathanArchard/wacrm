@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated Cloudflare/Vinext artifacts and test coverage.
+    ".cloudflare/**",
+    ".wrangler/**",
+    ".vinext/**",
+    "dist/**",
+    "coverage/**",
     // Vendored minified opus-recorder encoder worker (served statically).
     "public/opus/**",
   ]),
