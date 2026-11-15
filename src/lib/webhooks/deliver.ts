@@ -19,6 +19,7 @@
 // ============================================================
 
 import { randomUUID } from 'node:crypto';
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -49,6 +50,7 @@ export async function dispatchWebhookEvent(
   event: WebhookEvent,
   data: unknown
 ): Promise<void> {
+  if (externalDeliveryDisabled()) return;
   try {
     const { data: rows, error } = await db
       .from('webhook_endpoints')
