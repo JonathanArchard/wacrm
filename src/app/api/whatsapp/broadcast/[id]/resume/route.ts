@@ -14,6 +14,8 @@
 // public API's create endpoint.
 // ============================================================
 
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
+import { externalDeliveryUnavailable } from '@/lib/external-delivery-response';
 import { NextResponse } from 'next/server';
 import { after } from 'next/server';
 
@@ -55,6 +57,7 @@ export async function POST(
     // write, and viewers are read-only. Resuming is no different — it
     // puts real messages on real phones.
     const { supabase, accountId, userId } = await requireRole('agent');
+    if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
 
     const limit = checkRateLimit(
       `broadcast-resume:${userId}`,
