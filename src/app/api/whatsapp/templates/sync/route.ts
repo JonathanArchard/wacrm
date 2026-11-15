@@ -1,3 +1,4 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
 import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
 import { externalDeliveryUnavailable } from '@/lib/external-delivery-response';
 import { NextResponse } from 'next/server'
@@ -182,7 +183,12 @@ export async function POST() {
 
     while (nextUrl && pageCount < PAGE_CAP) {
       pageCount++
-      const metaRes: Response = await fetch(nextUrl, {
+      const destination = new URL(nextUrl)
+      if (destination.origin !== 'https://graph.facebook.com' || destination.username || destination.password) {
+        throw new Error('Invalid Meta pagination destination')
+      }
+      const metaRes: Response = await guardedNetworkFetch(destination, {
+        redirect: 'error',
         headers: { Authorization: `Bearer ${accessToken}` },
       })
 
