@@ -7,6 +7,7 @@
 // cleanly. Nothing here knows about MCP — it's just the CRM API.
 // ============================================================
 
+import { assertMcpOrigin, guardedMcpFetch } from './network-policy.js';
 import type { Config } from './config.js';
 
 /** A structured error from the wacrm API envelope (`{ error: { code, message } }`). */
@@ -32,7 +33,9 @@ export class WacrmClient {
   private readonly apiKey: string;
 
   constructor(config: Pick<Config, 'baseUrl' | 'apiKey'>) {
-    this.baseUrl = config.baseUrl;
+    const destination = assertMcpOrigin(config.baseUrl);
+    if (destination.pathname !== '/' || destination.search || destination.hash) throw new Error('MCP base URL must be an origin');
+    this.baseUrl = destination.origin;
     this.apiKey = config.apiKey;
   }
 
@@ -60,16 +63,16 @@ export class WacrmClient {
 
     let res: Response;
     try {
-      res = await fetch(url, {
+      res = await guardedMcpFetch(url, {
         method,
         headers,
         body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
       });
-    } catch (err) {
+    } catch {
       throw new WacrmApiError(
         0,
         'network_error',
-        `Could not reach wacrm at ${this.baseUrl}: ${(err as Error).message}`,
+        'CRM network request failed',
       );
     }
 
