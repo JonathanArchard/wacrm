@@ -1,3 +1,4 @@
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
 // ============================================================
 // Broadcast resume / retry (issue #472).
 //
@@ -66,6 +67,7 @@ export async function claimBroadcastDelivery(
   broadcastId: string,
   now: Date = new Date()
 ): Promise<boolean> {
+  if (backgroundJobsDisabled()) return false;
   const staleCutoff = new Date(
     now.getTime() - DELIVERY_LOCK_STALE_MS
   ).toISOString();
@@ -142,6 +144,7 @@ export async function planBroadcastResume(
   broadcastId: string,
   scope: ResumeScope
 ): Promise<ResumePlan> {
+  if (backgroundJobsDisabled()) throw new BroadcastError('background_jobs_disabled', 'Background jobs are disabled in this environment', 503);
   const { data: broadcast, error: bcError } = await db
     .from('broadcasts')
     .select('id, template_name, template_language')
@@ -281,6 +284,7 @@ export async function markBroadcastSending(
   db: SupabaseClient,
   broadcastId: string
 ): Promise<void> {
+  if (backgroundJobsDisabled()) return;
   await db
     .from('broadcasts')
     .update({ status: 'sending', updated_at: new Date().toISOString() })

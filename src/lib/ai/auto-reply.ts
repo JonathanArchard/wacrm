@@ -1,3 +1,4 @@
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
 import { externalAiDisabled } from './environment-policy'
 import { supabaseAdmin } from './admin-client'
 import { loadAiConfig } from './config'
@@ -51,7 +52,7 @@ interface DispatchArgs {
 export async function dispatchInboundToAiReply(
   args: DispatchArgs,
 ): Promise<void> {
-  if (externalAiDisabled()) return
+  if (externalAiDisabled() || backgroundJobsDisabled()) return
   const {
     accountId,
     conversationId,

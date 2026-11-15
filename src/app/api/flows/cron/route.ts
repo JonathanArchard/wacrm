@@ -1,3 +1,5 @@
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
+import { backgroundJobsUnavailable } from '@/lib/background-jobs-response';
 import { timingSafeEqual } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/flows/admin-client'
@@ -36,6 +38,7 @@ interface TimedOutRunRow {
  * tenants.
  */
 export async function GET(request: Request) {
+  if (backgroundJobsDisabled()) return backgroundJobsUnavailable();
   const expected = process.env.AUTOMATION_CRON_SECRET
   if (!expected) {
     return NextResponse.json({ error: 'cron not configured' }, { status: 503 })

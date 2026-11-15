@@ -1,3 +1,4 @@
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
 // ============================================================
 // Outbound webhook delivery.
 //
@@ -50,7 +51,7 @@ export async function dispatchWebhookEvent(
   event: WebhookEvent,
   data: unknown
 ): Promise<void> {
-  if (outboundWebhooksDisabled()) return;
+  if (outboundWebhooksDisabled() || backgroundJobsDisabled()) return;
   try {
     const { data: rows, error } = await db
       .from('webhook_endpoints')
@@ -92,7 +93,7 @@ async function deliverOne(
   payload: string,
   tsSeconds: number
 ): Promise<void> {
-  if (outboundWebhooksDisabled()) return;
+  if (outboundWebhooksDisabled() || backgroundJobsDisabled()) return;
   // SSRF guard: refuse to POST to a host that resolves to a private /
   // loopback / link-local address. Counts as a failure so a
   // misconfigured internal URL surfaces and eventually auto-disables.
@@ -102,7 +103,7 @@ async function deliverOne(
     return;
   }
 
-  if (outboundWebhooksDisabled()) return;
+  if (outboundWebhooksDisabled() || backgroundJobsDisabled()) return;
   let secret: string;
   try {
     secret = decrypt(row.secret);
@@ -115,7 +116,7 @@ async function deliverOne(
   }
 
   try {
-    if (outboundWebhooksDisabled()) return;
+    if (outboundWebhooksDisabled() || backgroundJobsDisabled()) return;
     const res = await fetch(row.url, {
       method: 'POST',
       headers: {

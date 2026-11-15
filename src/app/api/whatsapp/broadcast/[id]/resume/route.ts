@@ -1,3 +1,5 @@
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
+import { backgroundJobsUnavailable } from '@/lib/background-jobs-response';
 // ============================================================
 // POST /api/whatsapp/broadcast/[id]/resume   (issue #472)
 //
@@ -58,6 +60,7 @@ export async function POST(
     // puts real messages on real phones.
     const { supabase, accountId, userId } = await requireRole('agent');
     if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
+    if (backgroundJobsDisabled()) return backgroundJobsUnavailable();
 
     const limit = checkRateLimit(
       `broadcast-resume:${userId}`,

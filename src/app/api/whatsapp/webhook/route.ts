@@ -1,3 +1,5 @@
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
+import { backgroundJobsUnavailable } from '@/lib/background-jobs-response';
 import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
 import { externalDeliveryUnavailable } from '@/lib/external-delivery-response';
 import { NextResponse, after } from 'next/server'
@@ -149,6 +151,7 @@ interface WhatsAppWebhookEntry {
 // GET - Webhook verification
 export async function GET(request: Request) {
   if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
+    if (backgroundJobsDisabled()) return backgroundJobsUnavailable();
   try {
     const { searchParams } = new URL(request.url)
     const mode = searchParams.get('hub.mode')
@@ -232,6 +235,7 @@ export async function GET(request: Request) {
 // POST - Receive messages
 export async function POST(request: Request) {
   if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
+    if (backgroundJobsDisabled()) return backgroundJobsUnavailable();
   // Read raw body first so we can HMAC-verify the exact bytes Meta
   // signed. request.json() would re-encode and break the signature.
   const rawBody = await readCappedBody(request)

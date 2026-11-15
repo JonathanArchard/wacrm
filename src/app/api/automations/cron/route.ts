@@ -1,3 +1,5 @@
+import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
+import { backgroundJobsUnavailable } from '@/lib/background-jobs-response';
 import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
 import { externalDeliveryUnavailable } from '@/lib/external-delivery-response';
 import { timingSafeEqual } from 'node:crypto'
@@ -23,6 +25,7 @@ import type { AutomationContext } from '@/lib/automations/engine'
  * two-step UPDATE-by-id.
  */
 export async function GET(request: Request) {
+  if (backgroundJobsDisabled()) return backgroundJobsUnavailable();
   const expected = process.env.AUTOMATION_CRON_SECRET
   if (!expected) {
     return NextResponse.json({ error: 'cron not configured' }, { status: 503 })
