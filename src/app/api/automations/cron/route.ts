@@ -25,7 +25,6 @@ import type { AutomationContext } from '@/lib/automations/engine'
  * two-step UPDATE-by-id.
  */
 export async function GET(request: Request) {
-  if (backgroundJobsDisabled()) return backgroundJobsUnavailable();
   const expected = process.env.AUTOMATION_CRON_SECRET
   if (!expected) {
     return NextResponse.json({ error: 'cron not configured' }, { status: 503 })
@@ -41,6 +40,7 @@ export async function GET(request: Request) {
   }
 
   if (externalDeliveryDisabled()) return externalDeliveryUnavailable();
+  if (backgroundJobsDisabled()) return backgroundJobsUnavailable();
 
   // Close out wait_for_reply runs whose 24h reply window lapsed. The
   // webhook already refuses to resume them; this just settles their

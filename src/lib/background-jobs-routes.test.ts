@@ -13,3 +13,11 @@ it.each([automationCron, flowCron])('denies cron before DB access even with vali
   expect((await result.json()).code).toBe('BACKGROUND_JOBS_DISABLED');
   expect(admin).not.toHaveBeenCalled();
 });
+
+it.each([automationCron, flowCron])('retains authentication before background isolation', async handler => {
+  vi.stubEnv('AUTOMATION_CRON_SECRET', 'test-only');
+  vi.stubEnv('BACKGROUND_JOBS_ENABLED', 'false');
+  const result = await handler(new Request('https://example.invalid'));
+  expect(result.status).toBe(401);
+  expect(admin).not.toHaveBeenCalled();
+});

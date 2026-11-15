@@ -38,7 +38,6 @@ interface TimedOutRunRow {
  * tenants.
  */
 export async function GET(request: Request) {
-  if (backgroundJobsDisabled()) return backgroundJobsUnavailable();
   const expected = process.env.AUTOMATION_CRON_SECRET
   if (!expected) {
     return NextResponse.json({ error: 'cron not configured' }, { status: 503 })
@@ -56,6 +55,8 @@ export async function GET(request: Request) {
   ) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  if (backgroundJobsDisabled()) return backgroundJobsUnavailable();
 
   const admin = supabaseAdmin()
   const now = new Date()
