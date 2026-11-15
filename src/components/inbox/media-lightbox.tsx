@@ -1,5 +1,6 @@
 "use client";
 
+import { browserNetworkRestricted, safeBrowserMediaUrl } from "@/lib/browser-network-policy";
 import { useCallback, useEffect, useState } from "react";
 import { format } from "date-fns";
 import {
@@ -147,8 +148,8 @@ export function MediaLightbox({
                 onClick={toggleZoom}
               />
             )}
-            <a
-              href={item.url}
+            {!browserNetworkRestricted() && <a
+              href={safeBrowserMediaUrl(item.url)}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={t("openOriginal")}
@@ -156,7 +157,7 @@ export function MediaLightbox({
               className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <ExternalLink className="h-4 w-4" />
-            </a>
+            </a>}
             <ToolbarButton
               icon={Download}
               label={t("download")}
@@ -177,7 +178,7 @@ export function MediaLightbox({
           ) : (
             <video
               // Plain URL, never a blob — the player should stream.
-              src={item.url}
+              src={safeBrowserMediaUrl(item.url)}
               controls
               preload="metadata"
               className={cn(MEDIA_MAX_HEIGHT, "max-w-full rounded-lg")}

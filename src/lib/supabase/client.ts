@@ -1,3 +1,4 @@
+import { browserNetworkRestricted, guardedBrowserFetch, assertBrowserSupabaseDestination } from '@/lib/browser-network-policy';
 import { guardedAuthFetch } from '@/lib/auth/email-fetch'
 import { createBrowserClient } from '@supabase/ssr'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -10,13 +11,14 @@ let browserClient: SupabaseClient | undefined
 export function createClient() {
   if (browserClient) return browserClient
 
+  assertBrowserSupabaseDestination(process.env.NEXT_PUBLIC_SUPABASE_URL!);
   browserClient = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { global: { fetch: guardedAuthFetch(async () => {
-      const response = await fetch('/api/auth/email-policy', { cache: 'no-store' });
+      const response = await guardedBrowserFetch('/api/auth/email-policy', { cache: 'no-store' });
       return response.ok && (await response.json()).enabled === true;
-    }) } }
+    }, guardedBrowserFetch) } }
   )
 
   return browserClient

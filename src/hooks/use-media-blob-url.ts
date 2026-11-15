@@ -1,5 +1,6 @@
 "use client";
 
+import { safeBrowserMediaUrl } from "@/lib/browser-network-policy";
 import { useEffect, useState } from "react";
 import { isProxiedMediaUrl, loadMediaBlob } from "@/lib/media/blob-cache";
 
@@ -34,7 +35,7 @@ export function useMediaBlobUrl(url: string | undefined): MediaBlobUrlState {
   const [resolved, setResolved] = useState<ResolvedMedia | null>(null);
 
   useEffect(() => {
-    if (!url || !isProxiedMediaUrl(url)) return;
+    if (!url || !safeBrowserMediaUrl(url) || !isProxiedMediaUrl(url)) return;
 
     let cancelled = false;
     // Held in a local rather than read back off state, because that is
@@ -61,6 +62,7 @@ export function useMediaBlobUrl(url: string | undefined): MediaBlobUrlState {
   }, [url]);
 
   if (!url) return { src: null, status: "idle" };
+  if (!safeBrowserMediaUrl(url)) return { src: null, status: "error" };
 
   // Nothing to load for a public URL — derived here rather than pushed
   // through state so the first paint already has the image.

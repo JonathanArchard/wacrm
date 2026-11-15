@@ -1,3 +1,4 @@
+import { browserNetworkRestricted, safeBrowserMediaUrl } from '@/lib/browser-network-policy';
 import type { Message } from "@/types";
 import { loadMediaBlob, MediaResponseError } from "./blob-cache";
 import { mediaFilename } from "./filename";
@@ -21,6 +22,7 @@ const t = getT("LibErrors");
  */
 export async function downloadMediaMessage(message: Message): Promise<void> {
   const url = message.media_url;
+  if (url && !safeBrowserMediaUrl(url)) throw new MediaResponseError(403);
   if (!url) throw new Error(t("media.noAttachment"));
 
   let blob: Blob;
@@ -35,7 +37,7 @@ export async function downloadMediaMessage(message: Message): Promise<void> {
     // stricter CORS policy than ours can block the XHR while the browser
     // is still perfectly able to navigate to the object. Handing the URL
     // to a new tab gets the agent to the file, visibly.
-    if (openInNewTab(url)) return;
+    if (!browserNetworkRestricted() && openInNewTab(url)) return;
     throw error;
   }
 

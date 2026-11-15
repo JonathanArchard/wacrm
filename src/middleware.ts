@@ -1,3 +1,5 @@
+import { stagingContentSecurityPolicy } from '@/lib/browser-network-policy';
+import { externalNetworkDisabled } from '@/lib/network-policy';
 import { guardedNetworkFetch } from '@/lib/network-policy';
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
@@ -37,11 +39,17 @@ export async function middleware(request: NextRequest) {
   // the session wedges — the user gets a broken reload after idling and
   // can only recover by manually clearing cookies (issue #288). Copy the
   // refreshed cookies onto whatever response we hand back to fix that.
+  const applyBrowserPolicy = <T extends NextResponse>(response: T): T => {
+    if (externalNetworkDisabled() || request.nextUrl.hostname === 'wa-staging.ftta.in') {
+      response.headers.set('Content-Security-Policy', stagingContentSecurityPolicy());
+    }
+    return response;
+  }
   const withRefreshedCookies = <T extends NextResponse>(response: T): T => {
     supabaseResponse.cookies.getAll().forEach((cookie) => {
       response.cookies.set(cookie)
     })
-    return response
+    return applyBrowserPolicy(response)
   }
 
   // Auth pages - redirect to dashboard if already logged in.
@@ -89,7 +97,7 @@ export async function middleware(request: NextRequest) {
     )
   }
 
-  return supabaseResponse
+  return applyBrowserPolicy(supabaseResponse)
 }
 
 export const config = {

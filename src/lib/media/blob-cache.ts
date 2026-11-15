@@ -1,3 +1,4 @@
+import { guardedBrowserFetch, safeBrowserMediaUrl } from '@/lib/browser-network-policy';
 /**
  * Shared loader for chat-media bytes.
  *
@@ -41,7 +42,7 @@ const inFlight = new Map<string, Promise<Blob>>();
 /** Minimal `fetch` shape — injectable so the cache is testable. */
 export type MediaFetch = (url: string) => Promise<Response>;
 
-const defaultFetch: MediaFetch = (url) => fetch(url);
+const defaultFetch: MediaFetch = (url) => guardedBrowserFetch(url);
 
 /**
  * The request completed and the server refused it — a 401 on inbound media
@@ -88,6 +89,7 @@ export async function loadMediaBlob(
   url: string,
   fetchImpl: MediaFetch = defaultFetch,
 ): Promise<Blob> {
+  if (!safeBrowserMediaUrl(url)) throw new MediaResponseError(403);
   if (!isProxiedMediaUrl(url)) {
     const res = await fetchImpl(url);
     if (!res.ok) throw new MediaResponseError(res.status);
