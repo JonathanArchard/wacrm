@@ -12,13 +12,10 @@
 import { isBusinessScopedUserId } from './wa-identity'
 import { getT } from '@/lib/i18n/translate'
 
-// Staging must never interact with a live Meta account. An explicit false
-// also acts as a kill switch for other environments. Preserve upstream
-// behavior for existing self-hosted installs without these bindings.
+import { externalDeliveryDisabled } from '@/lib/external-delivery-policy'
+
 function assertMetaAccessAllowed(): void {
-  if (process.env.APP_ENV === 'staging' ||
-      process.env.NEXT_PUBLIC_SITE_URL === 'https://wa-staging.ftta.in' ||
-      process.env.WHATSAPP_ENABLED === 'false') {
+  if (externalDeliveryDisabled()) {
     throw new Error('WhatsApp integration is disabled in this environment.')
   }
 }
