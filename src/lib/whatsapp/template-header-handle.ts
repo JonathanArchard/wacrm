@@ -1,3 +1,4 @@
+import { externalNetworkDisabled, guardedNetworkFetch } from '@/lib/network-policy'
 import { uploadResumableMedia } from '@/lib/whatsapp/meta-api'
 import { MEDIA_HEADER_SPECS, isMediaHeaderKind } from '@/lib/whatsapp/media-header-types'
 import type { TemplatePayload } from '@/lib/whatsapp/template-validators'
@@ -34,6 +35,8 @@ export async function ensureMediaHeaderHandle(
   if (payload.header_handle) return // already have one
   if (!payload.header_media_url) return // validator already requires url-or-handle
 
+  if (externalNetworkDisabled()) throw new Error(unreachableMessage())
+
   const spec = MEDIA_HEADER_SPECS[kind]
 
   const appId = process.env.META_APP_ID
@@ -55,7 +58,7 @@ export async function ensureMediaHeaderHandle(
   // a manually-pasted public link).
   let res: Response
   try {
-    res = await fetch(payload.header_media_url, {
+    res = await guardedNetworkFetch(payload.header_media_url, {
       // Do NOT follow redirects — a public URL could 3xx-bounce to an
       // internal address, defeating the guard above. Bound the request so
       // a hung host can't tie up the template-submit handler.
