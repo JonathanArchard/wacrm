@@ -19,7 +19,7 @@
 // ============================================================
 
 import { randomUUID } from 'node:crypto';
-import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
+import { outboundWebhooksDisabled } from './environment-policy';
 
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -50,7 +50,7 @@ export async function dispatchWebhookEvent(
   event: WebhookEvent,
   data: unknown
 ): Promise<void> {
-  if (externalDeliveryDisabled()) return;
+  if (outboundWebhooksDisabled()) return;
   try {
     const { data: rows, error } = await db
       .from('webhook_endpoints')
@@ -92,6 +92,7 @@ async function deliverOne(
   payload: string,
   tsSeconds: number
 ): Promise<void> {
+  if (outboundWebhooksDisabled()) return;
   // SSRF guard: refuse to POST to a host that resolves to a private /
   // loopback / link-local address. Counts as a failure so a
   // misconfigured internal URL surfaces and eventually auto-disables.
@@ -101,6 +102,7 @@ async function deliverOne(
     return;
   }
 
+  if (outboundWebhooksDisabled()) return;
   let secret: string;
   try {
     secret = decrypt(row.secret);
@@ -113,6 +115,7 @@ async function deliverOne(
   }
 
   try {
+    if (outboundWebhooksDisabled()) return;
     const res = await fetch(row.url, {
       method: 'POST',
       headers: {

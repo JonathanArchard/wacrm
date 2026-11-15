@@ -3,6 +3,11 @@ import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 export function validateStagingDeployment(branch, config) {
+  // A staging binding must be a single literal false declaration.
+  const disabledBinding = (name) => {
+    const declarations = config.split(/\r?\n/).filter(line => new RegExp('^\\s*' + name + '\\s*:').test(line));
+    return declarations.length === 1 && new RegExp('^\\s*' + name + '\\s*:\\s*bindings\\.text\\("false"\\)\\s*,?\\s*$').test(declarations[0]);
+  };
   const checks = [
     [branch === 'staging', 'Deployment requires the staging branch'],
     [/name:\s*"wacrm-staging"/.test(config), 'Expected staging Worker'],
@@ -10,7 +15,8 @@ export function validateStagingDeployment(branch, config) {
     [/NEXT_PUBLIC_SUPABASE_URL:\s*bindings\.text\(\s*"https:\/\/wufgihqppsmbhflbwtcc\.supabase\.co"\s*\)/.test(config), 'Expected staging Supabase project'],
     [/APP_ENV:\s*bindings\.text\("staging"\)/.test(config), 'Expected staging environment'],
     [/WHATSAPP_ENABLED:\s*bindings\.text\("false"\)/.test(config), 'WhatsApp must be disabled'],
-    [/AI_ENABLED:\s*bindings\.text\("false"\)/.test(config), 'AI must be disabled'],
+    [disabledBinding('AI_ENABLED'), 'AI must be disabled'],
+    [disabledBinding('OUTBOUND_WEBHOOKS_ENABLED'), 'Outbound webhooks must be disabled'],
     [!config.includes('mimjmzjjsfteiwsztypk') && !config.includes('https://wa.ftta.in'), 'Production targets must be absent'],
   ];
   return checks.filter(([ok]) => !ok).map(([, message]) => message);

@@ -61,9 +61,37 @@ beforeEach(() => {
   vi.mocked(isDeliverableUrl).mockResolvedValue(true);
   vi.stubGlobal('fetch', vi.fn());
 });
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
 
 describe('dispatchWebhookEvent', () => {
+  it.each([undefined, '', 'false', 'TRUE', '1'])('blocks flag %s before DB, DNS or fetch', async (flag) => {
+    vi.stubEnv('OUTBOUND_WEBHOOKS_ENABLED', flag);
+    const from = vi.fn();
+    const rpc = vi.fn();
+    await dispatchWebhookEvent({ from, rpc } as unknown as SupabaseClient, 'acct-1', 'message.received', {});
+    expect(from).not.toHaveBeenCalled();
+    expect(rpc).not.toHaveBeenCalled();
+    expect(isDeliverableUrl).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('blocks staging even with explicit opt-in', async () => {
+    vi.stubEnv('APP_ENV', 'staging');
+    const from = vi.fn();
+    await dispatchWebhookEvent({ from } as unknown as SupabaseClient, 'acct-1', 'message.received', {});
+    expect(from).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('allows explicit production webhook delivery independently of WhatsApp and AI', async () => {
+    vi.stubEnv('WHATSAPP_ENABLED', 'false');
+    vi.stubEnv('AI_ENABLED', 'false');
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+    vi.stubGlobal('fetch', fetchMock);
+    await dispatchWebhookEvent(makeDb([{ id: 'a', url: 'https://a.test/hook', secret: 's1' }], emptyCalls()), 'acct-1', 'message.received', {});
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('signs + POSTs (no redirect follow) and resets failure_count on success', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 } as Response);
     vi.stubGlobal('fetch', fetchMock);
