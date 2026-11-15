@@ -1,3 +1,4 @@
+import { guardedAuthFetch } from '@/lib/auth/email-fetch'
 import { createBrowserClient } from '@supabase/ssr'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -11,7 +12,11 @@ export function createClient() {
 
   browserClient = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { global: { fetch: guardedAuthFetch(async () => {
+      const response = await fetch('/api/auth/email-policy', { cache: 'no-store' });
+      return response.ok && (await response.json()).enabled === true;
+    }) } }
   )
 
   return browserClient

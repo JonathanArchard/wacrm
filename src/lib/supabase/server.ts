@@ -1,3 +1,5 @@
+import { guardedAuthFetch } from '@/lib/auth/email-fetch'
+import { externalEmailDisabled } from '@/lib/auth/email-policy'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -8,6 +10,7 @@ export async function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      global: { fetch: guardedAuthFetch(() => !externalEmailDisabled()) },
       cookies: {
         getAll() {
           return cookieStore.getAll()

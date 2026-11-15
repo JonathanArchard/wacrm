@@ -16,6 +16,7 @@ export function validateStagingDeployment(branch, config) {
     [/APP_ENV:\s*bindings\.text\("staging"\)/.test(config), 'Expected staging environment'],
     [/WHATSAPP_ENABLED:\s*bindings\.text\("false"\)/.test(config), 'WhatsApp must be disabled'],
     [disabledBinding('AI_ENABLED'), 'AI must be disabled'],
+    [disabledBinding('EMAIL_ENABLED'), 'Email must be disabled'],
     [disabledBinding('OUTBOUND_WEBHOOKS_ENABLED'), 'Outbound webhooks must be disabled'],
     [!config.includes('mimjmzjjsfteiwsztypk') && !config.includes('https://wa.ftta.in'), 'Production targets must be absent'],
   ];

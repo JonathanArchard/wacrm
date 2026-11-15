@@ -28,6 +28,7 @@ test('rejects production references', () => {
 
 for (const [flag, message] of [
   ['AI_ENABLED', 'AI must be disabled'],
+  ['EMAIL_ENABLED', 'Email must be disabled'],
   ['OUTBOUND_WEBHOOKS_ENABLED', 'Outbound webhooks must be disabled'],
 ]) {
   const original = flag + ': bindings.text("false"),';

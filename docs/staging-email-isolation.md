@@ -1,0 +1,9 @@
+# Staging email isolation — deployment hold
+
+Application guard: EMAIL_ENABLED=false, fail closed unless production and explicitly true. Browser SDK checks a no-store server policy endpoint; server SDK checks runtime directly. Signup, recovery, OTP, resend, invitation and email changes are denied at the Auth fetch boundary. Existing password sign-in/session and password-only updates remain available. Internal account invitation links are generated locally; no email is sent by the inspected invitation route.
+
+## Hosted Supabase Auth is a separate trust boundary
+
+The public Auth API can be called directly, bypassing the app. Default SMTP exists even without custom credentials. Before staging launch, obtain explicit approval to configure the **staging project only**: install a supported Send Email Hook that rejects or safely suppresses every email without forwarding or logging payloads, including security notifications; verify its behavior and no SMTP fallback. Disable public signup and unnecessary identity providers, restrict redirect URLs to staging, use synthetic users, and do not provision real SMTP credentials. Password-only updates may generate security notifications depending on hosted settings; do not exercise live flows until this hook is verified. Existing password login must be tested with synthetic credentials. Review direct Auth API, admin invites, recovery, OTP, resend, email changes, password-change notifications, and any database/edge-function mail paths. Do not test by sending real emails. See https://supabase.com/docs/guides/auth/auth-hooks/send-email-hook and https://supabase.com/docs/guides/auth/auth-smtp.
+
+Hosted settings have not been read or changed; CLI config is CI-only. Application tests do not prove hosted isolation. No deployment until hosted barrier is verified. Production must explicitly set EMAIL_ENABLED=true when adopting this branch.

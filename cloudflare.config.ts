@@ -35,6 +35,7 @@ export default defineConfig({
       WHATSAPP_ENABLED: bindings.text("false"),
       AI_ENABLED: bindings.text("false"),
       OUTBOUND_WEBHOOKS_ENABLED: bindings.text("false"),
+      EMAIL_ENABLED: bindings.text("false"),
 
       // Secrets managed securely through Cloudflare
       NEXT_PUBLIC_SUPABASE_ANON_KEY: bindings.secret(),
