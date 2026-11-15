@@ -19,6 +19,7 @@ export default defineConfig({
       AI_ENABLED: "true",
       EMAIL_ENABLED: "true",
       BACKGROUND_JOBS_ENABLED: "true",
+      EXTERNAL_NETWORK_ENABLED: "true",
       OUTBOUND_WEBHOOKS_ENABLED: "true",
       NEXT_PUBLIC_SITE_URL: "https://test.example.invalid",
       NEXT_PUBLIC_SUPABASE_URL: "https://ci.example.invalid",

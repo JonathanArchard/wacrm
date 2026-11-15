@@ -1,3 +1,4 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
 import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
 import { backgroundJobsUnavailable } from '@/lib/background-jobs-response';
 import { externalDeliveryDisabled } from '@/lib/external-delivery-policy';
@@ -50,7 +51,8 @@ function supabaseAdmin() {
   if (!_adminClient) {
     _adminClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { global: { fetch: guardedNetworkFetch } }
     )
   }
   return _adminClient

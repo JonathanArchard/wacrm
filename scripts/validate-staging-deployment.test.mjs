@@ -30,6 +30,7 @@ for (const [flag, message] of [
   ['AI_ENABLED', 'AI must be disabled'],
   ['EMAIL_ENABLED', 'Email must be disabled'],
   ['BACKGROUND_JOBS_ENABLED', 'Background jobs must be disabled'],
+  ['EXTERNAL_NETWORK_ENABLED', 'External network must be disabled'],
   ['OUTBOUND_WEBHOOKS_ENABLED', 'Outbound webhooks must be disabled'],
 ]) {
   const original = flag + ': bindings.text("false"),';

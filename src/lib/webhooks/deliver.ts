@@ -1,3 +1,4 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
 import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
 // ============================================================
 // Outbound webhook delivery.
@@ -117,7 +118,7 @@ async function deliverOne(
 
   try {
     if (outboundWebhooksDisabled() || backgroundJobsDisabled()) return;
-    const res = await fetch(row.url, {
+    const res = await guardedNetworkFetch(row.url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

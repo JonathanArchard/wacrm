@@ -1,3 +1,4 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
 import { assertExternalAiAllowed } from '../environment-policy'
 import { AiError, type ProviderResult } from '../types'
 import { MAX_OUTPUT_TOKENS } from '../defaults'
@@ -34,7 +35,7 @@ export async function generateOpenAi(args: ProviderArgs): Promise<ProviderResult
 
   let res: Response
   try {
-    res = await fetch(OPENAI_URL, {
+    res = await guardedNetworkFetch(OPENAI_URL, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,

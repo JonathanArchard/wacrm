@@ -1,3 +1,4 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
 import { assertExternalAiAllowed } from '../environment-policy'
 import { AiError, type ChatMessage, type ProviderResult } from '../types'
 import { MAX_OUTPUT_TOKENS } from '../defaults'
@@ -49,7 +50,7 @@ export async function generateAnthropic(args: ProviderArgs): Promise<ProviderRes
 
   let res: Response
   try {
-    res = await fetch(ANTHROPIC_URL, {
+    res = await guardedNetworkFetch(ANTHROPIC_URL, {
       method: 'POST',
       headers: {
         'x-api-key': apiKey,

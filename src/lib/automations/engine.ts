@@ -1,3 +1,4 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
 import { backgroundJobsDisabled } from '@/lib/background-jobs-policy';
 import { outboundWebhooksDisabled } from '@/lib/webhooks/environment-policy';
 import type {
@@ -982,7 +983,7 @@ async function runStep(step: AutomationStep, args: ExecuteArgs): Promise<string>
         throw new Error(tErr('destinationNotAllowed'))
       }
       const body = cfg.body_template ? interpolate(cfg.body_template, args) : JSON.stringify(args.context)
-      const res = await fetch(cfg.url, {
+      const res = await guardedNetworkFetch(cfg.url, {
         method: 'POST',
         headers: { 'content-type': 'application/json', ...(cfg.headers ?? {}) },
         body,

@@ -1,3 +1,4 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 // Lazy, shared service-role client for the AI auto-reply path.
@@ -11,6 +12,7 @@ export function supabaseAdmin(): SupabaseClient {
     _adminClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { global: { fetch: guardedNetworkFetch } },
     )
   }
   return _adminClient

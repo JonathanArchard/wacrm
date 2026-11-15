@@ -1,3 +1,4 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
 /**
  * Meta WhatsApp Cloud API helpers.
  *
@@ -22,7 +23,7 @@ function assertMetaAccessAllowed(): void {
 
 async function guardedMetaFetch(input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]): Promise<Response> {
   assertMetaAccessAllowed()
-  return fetch(input, init)
+  return guardedNetworkFetch(input, init)
 }
 
 const ti = getT('Validation.interactive')

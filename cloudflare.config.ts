@@ -37,6 +37,7 @@ export default defineConfig({
       OUTBOUND_WEBHOOKS_ENABLED: bindings.text("false"),
       EMAIL_ENABLED: bindings.text("false"),
       BACKGROUND_JOBS_ENABLED: bindings.text("false"),
+      EXTERNAL_NETWORK_ENABLED: bindings.text("false"),
 
       // Secrets managed securely through Cloudflare
       NEXT_PUBLIC_SUPABASE_ANON_KEY: bindings.secret(),

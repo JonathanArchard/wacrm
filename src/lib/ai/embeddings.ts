@@ -1,3 +1,4 @@
+import { guardedNetworkFetch } from '@/lib/network-policy';
 import { assertExternalAiAllowed } from './environment-policy'
 import { AiError } from './types'
 import { aiRequestTimeoutMs } from './defaults'
@@ -56,7 +57,7 @@ export async function embedTexts(
 
     let res: Response
     try {
-      res = await fetch(OPENAI_EMBEDDINGS_URL, {
+      res = await guardedNetworkFetch(OPENAI_EMBEDDINGS_URL, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${apiKey}`,
